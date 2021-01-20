@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option go_package = ".;grpcgenerated";
+
+service BannerRotationService {
+  rpc AddBanner(AddBannerRequest) returns (google.protobuf.Empty);
+  rpc RemoveBanner(RemoveBannerRequest) returns (google.protobuf.Empty);
+  rpc IncrementCounter(IncrementCounterRequest) returns (google.protobuf.Empty);
+  rpc ChooseBanner(ChooseBannerRequest) returns (ChooseBannerResponse);
+}
+
+message AddBannerRequest {
+  string slot_id = 1;
+  string banner_id = 2;
+}
+
+message RemoveBannerRequest {
+  string slot_id = 1;
+  string banner_id = 2;
+}
+
+message IncrementCounterRequest {
+  string slot_id = 1;
+  string banner_id = 2;
+  string user_group_id = 3;
+}
+
+message ChooseBannerRequest {
+  string slot_id = 1;
+  string user_group_id = 2;
+}
+
+message ChooseBannerResponse {
+  string banner_id = 1;
+}
