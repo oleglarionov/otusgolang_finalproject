@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres
+    ports:
+      - 54330:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

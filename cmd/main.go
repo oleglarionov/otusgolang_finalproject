@@ -17,11 +17,15 @@ func NewApp(server *internalgrpc.Server) *App {
 }
 
 func main() {
+	// todo: начать обрабатывать сигналы ОС
+
 	viper.AutomaticEnv()
 
 	serverPort := viper.Get("SERVER_PORT").(string)
+	dbDsn := viper.Get("DB_DSN").(string)
 	cfg := Config{
 		ServerPort: serverPort,
+		DBDsn:      dbDsn,
 	}
 
 	app, err := setup(cfg)

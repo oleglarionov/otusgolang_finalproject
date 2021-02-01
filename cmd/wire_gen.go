@@ -6,14 +6,28 @@
 package main
 
 import (
+	"github.com/jmoiron/sqlx"
+	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/banerrotation"
 	"github.com/oleglarionov/otusgolang_finalproject/internal/grpc"
 	"github.com/oleglarionov/otusgolang_finalproject/internal/grpc/generated"
+	"github.com/oleglarionov/otusgolang_finalproject/internal/infrastructure/repository/sql"
+	"github.com/oleglarionov/otusgolang_finalproject/internal/infrastructure/streamer"
+	"github.com/oleglarionov/otusgolang_finalproject/internal/usecase"
 )
 
 // Injectors from wire.go:
 
 func setup(cfg Config) (*App, error) {
-	bannerRotationServerImpl := internalgrpc.NewBannerRotationServerImpl()
+	db, err := dbProvider(cfg)
+	if err != nil {
+		return nil, err
+	}
+	bannerRepository := sql.NewBannerRepository(db)
+	counterRepository := sql.NewCounterRepository(db)
+	chooserImpl := banerrotation.NewChooserImpl(bannerRepository, counterRepository)
+	amqpStreamer := streamer.NewAmqpStreamer()
+	bannerRotationImpl := usecase.NewBannerRotationImpl(chooserImpl, bannerRepository, counterRepository, amqpStreamer)
+	bannerRotationServerImpl := internalgrpc.NewBannerRotationServerImpl(bannerRotationImpl)
 	server := grpcServerProvider(cfg, bannerRotationServerImpl)
 	app := NewApp(server)
 	return app, nil
@@ -23,4 +37,8 @@ func setup(cfg Config) (*App, error) {
 
 func grpcServerProvider(cfg Config, service grpcgenerated.BannerRotationServiceServer) *internalgrpc.Server {
 	return internalgrpc.NewServer(cfg.ServerPort, service)
+}
+
+func dbProvider(cfg Config) (*sqlx.DB, error) {
+	return sql.NewDB(cfg.DBDsn)
 }
