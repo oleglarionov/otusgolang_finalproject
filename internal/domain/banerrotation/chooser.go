@@ -38,7 +38,12 @@ func (s *ChooserImpl) ChooseBanner(ctx context.Context, slot SlotID, userGroup U
 	n := uint64(0)
 
 	for _, counter := range counters {
-		avgIncome = append(avgIncome, float64(counter.Clicks)/float64(counter.Views))
+		curIncome := 0.0
+		if counter.Views != 0 {
+			curIncome = float64(counter.Clicks) / float64(counter.Views)
+		}
+
+		avgIncome = append(avgIncome, curIncome)
 		nj = append(nj, counter.Views)
 		n += counter.Views
 	}

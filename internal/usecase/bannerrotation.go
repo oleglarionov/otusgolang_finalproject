@@ -12,7 +12,7 @@ type BannerRotation interface {
 	AddBanner(ctx context.Context, slotID string, bannerID string) error
 	RemoveBanner(ctx context.Context, slotID string, bannerID string) error
 	ChooseBanner(ctx context.Context, slotID string, userGroupID string) (string, error)
-	CountClick(ctx context.Context, slotID string, bannerID string, userGroupID string) error
+	RegisterClick(ctx context.Context, slotID string, bannerID string, userGroupID string) error
 }
 
 type BannerRotationImpl struct {
@@ -52,7 +52,7 @@ func (u *BannerRotationImpl) RemoveBanner(ctx context.Context, slotID string, ba
 	)
 }
 
-func (u *BannerRotationImpl) ChooseBanner(ctx context.Context, userGroupID string, slotID string) (string, error) {
+func (u *BannerRotationImpl) ChooseBanner(ctx context.Context, slotID string, userGroupID string) (string, error) {
 	slot := banerrotation.SlotID(slotID)
 	userGroup := banerrotation.UserGroupID(userGroupID)
 
@@ -75,7 +75,7 @@ func (u *BannerRotationImpl) ChooseBanner(ctx context.Context, userGroupID strin
 	return string(banner), nil
 }
 
-func (u *BannerRotationImpl) CountClick(ctx context.Context, slotID string, userGroupID string, bannerID string) error {
+func (u *BannerRotationImpl) RegisterClick(ctx context.Context, slotID string, userGroupID string, bannerID string) error {
 	slot := banerrotation.SlotID(slotID)
 	userGroup := banerrotation.UserGroupID(userGroupID)
 	banner := banerrotation.BannerID(bannerID)
