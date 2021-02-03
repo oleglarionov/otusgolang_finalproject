@@ -2,7 +2,7 @@ package sql
 
 import (
 	"github.com/jmoiron/sqlx"
-
+	"log"
 	// init driver.
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -14,5 +14,6 @@ func NewDB(dsn string) (*sqlx.DB, error) {
 		return nil, errors.WithStack(err)
 	}
 
+	log.Println("connection to database established")
 	return db, nil
 }
