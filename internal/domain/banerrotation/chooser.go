@@ -2,6 +2,7 @@ package banerrotation
 
 import (
 	"context"
+
 	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/algorithm"
 )
 

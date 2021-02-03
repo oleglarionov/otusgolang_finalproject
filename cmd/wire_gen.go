@@ -25,7 +25,7 @@ func setup(cfg Config) (*App, error) {
 	bannerRepository := sql.NewBannerRepository(db)
 	counterRepository := sql.NewCounterRepository(db)
 	chooserImpl := banerrotation.NewChooserImpl(bannerRepository, counterRepository)
-	amqpStreamer := streamer.NewAmqpStreamer()
+	amqpStreamer := streamer.NewAMQPStreamer()
 	bannerRotationImpl := usecase.NewBannerRotationImpl(chooserImpl, bannerRepository, counterRepository, amqpStreamer)
 	bannerRotationServerImpl := internalgrpc.NewBannerRotationServerImpl(bannerRotationImpl)
 	server := grpcServerProvider(cfg, bannerRotationServerImpl)

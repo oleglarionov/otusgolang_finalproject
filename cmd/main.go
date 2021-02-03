@@ -2,10 +2,11 @@ package main
 
 import (
 	"errors"
+	"log"
+
 	internalgrpc "github.com/oleglarionov/otusgolang_finalproject/internal/grpc"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-	"log"
 )
 
 type App struct {

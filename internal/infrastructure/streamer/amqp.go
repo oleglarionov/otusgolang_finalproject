@@ -4,13 +4,13 @@ import (
 	"github.com/oleglarionov/otusgolang_finalproject/internal/application/event"
 )
 
-type AmqpStreamer struct {
+type AMQPStreamer struct {
 }
 
-func NewAmqpStreamer() *AmqpStreamer {
-	return &AmqpStreamer{}
+func NewAMQPStreamer() *AMQPStreamer {
+	return &AMQPStreamer{}
 }
 
-func (s *AmqpStreamer) Push(event event.Event) error {
+func (s *AMQPStreamer) Push(event event.Event) error {
 	return nil // todo
 }

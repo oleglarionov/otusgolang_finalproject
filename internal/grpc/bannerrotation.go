@@ -2,6 +2,7 @@ package internalgrpc
 
 import (
 	"context"
+
 	grpcgenerated "github.com/oleglarionov/otusgolang_finalproject/internal/grpc/generated"
 	"github.com/oleglarionov/otusgolang_finalproject/internal/usecase"
 )

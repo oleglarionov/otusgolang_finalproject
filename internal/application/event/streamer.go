@@ -1,8 +1,9 @@
 package event
 
 import (
-	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/banerrotation"
 	"time"
+
+	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/banerrotation"
 )
 
 type Type string

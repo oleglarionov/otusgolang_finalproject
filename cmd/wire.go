@@ -28,8 +28,8 @@ func setup(cfg Config) (*App, error) {
 		sql.NewCounterRepository,
 		wire.Bind(new(banerrotation.BannerRepository), new(*sql.BannerRepository)),
 		sql.NewBannerRepository,
-		wire.Bind(new(event.Streamer), new(*streamer.AmqpStreamer)),
-		streamer.NewAmqpStreamer,
+		wire.Bind(new(event.Streamer), new(*streamer.AMQPStreamer)),
+		streamer.NewAMQPStreamer,
 		dbProvider,
 	)
 	return nil, nil

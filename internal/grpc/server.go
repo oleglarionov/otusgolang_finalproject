@@ -1,9 +1,10 @@
 package internalgrpc
 
 import (
+	"net"
+
 	grpcgenerated "github.com/oleglarionov/otusgolang_finalproject/internal/grpc/generated"
 	"google.golang.org/grpc"
-	"net"
 )
 
 type Server struct {

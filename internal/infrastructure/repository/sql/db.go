@@ -1,8 +1,10 @@
 package sql
 
 import (
-	"github.com/jmoiron/sqlx"
 	"log"
+
+	"github.com/jmoiron/sqlx"
+
 	// init driver.
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"

@@ -2,6 +2,7 @@ package memory
 
 import (
 	"context"
+
 	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/banerrotation"
 )
 

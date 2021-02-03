@@ -2,10 +2,11 @@ package usecase
 
 import (
 	"context"
-	"github.com/oleglarionov/otusgolang_finalproject/internal/application/event"
-	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/banerrotation"
 	"log"
 	"time"
+
+	"github.com/oleglarionov/otusgolang_finalproject/internal/application/event"
+	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/banerrotation"
 )
 
 type BannerRotation interface {
