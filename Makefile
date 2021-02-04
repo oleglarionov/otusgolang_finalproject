@@ -1,3 +1,5 @@
+BIN := "./bin/bannerrotation"
+
 generate:
 	go generate ./...
 
@@ -12,3 +14,8 @@ test:
 
 run:
 	docker-compose --file build/local/docker-compose.yaml up --build
+
+build:
+	go build -v -o $(BIN) ./cmd
+
+.PHONY: build

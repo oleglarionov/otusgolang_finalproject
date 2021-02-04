@@ -44,4 +44,4 @@ jobs:
     - stage: "Build"
       name: "Build binary"
       install: go mod download
-      script: cd cmd && go build .
+      script: make build
