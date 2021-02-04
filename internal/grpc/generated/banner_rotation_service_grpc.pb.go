@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type BannerRotationServiceClient interface {
 	AddBanner(ctx context.Context, in *AddBannerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	RemoveBanner(ctx context.Context, in *RemoveBannerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	IncrementCounter(ctx context.Context, in *IncrementCounterRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	RegisterClick(ctx context.Context, in *RegisterClickRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	ChooseBanner(ctx context.Context, in *ChooseBannerRequest, opts ...grpc.CallOption) (*ChooseBannerResponse, error)
 }
 
@@ -50,9 +50,9 @@ func (c *bannerRotationServiceClient) RemoveBanner(ctx context.Context, in *Remo
 	return out, nil
 }
 
-func (c *bannerRotationServiceClient) IncrementCounter(ctx context.Context, in *IncrementCounterRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *bannerRotationServiceClient) RegisterClick(ctx context.Context, in *RegisterClickRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/BannerRotationService/IncrementCounter", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/BannerRotationService/RegisterClick", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (c *bannerRotationServiceClient) ChooseBanner(ctx context.Context, in *Choo
 type BannerRotationServiceServer interface {
 	AddBanner(context.Context, *AddBannerRequest) (*empty.Empty, error)
 	RemoveBanner(context.Context, *RemoveBannerRequest) (*empty.Empty, error)
-	IncrementCounter(context.Context, *IncrementCounterRequest) (*empty.Empty, error)
+	RegisterClick(context.Context, *RegisterClickRequest) (*empty.Empty, error)
 	ChooseBanner(context.Context, *ChooseBannerRequest) (*ChooseBannerResponse, error)
 	mustEmbedUnimplementedBannerRotationServiceServer()
 }
@@ -89,8 +89,8 @@ func (UnimplementedBannerRotationServiceServer) AddBanner(context.Context, *AddB
 func (UnimplementedBannerRotationServiceServer) RemoveBanner(context.Context, *RemoveBannerRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveBanner not implemented")
 }
-func (UnimplementedBannerRotationServiceServer) IncrementCounter(context.Context, *IncrementCounterRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method IncrementCounter not implemented")
+func (UnimplementedBannerRotationServiceServer) RegisterClick(context.Context, *RegisterClickRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterClick not implemented")
 }
 func (UnimplementedBannerRotationServiceServer) ChooseBanner(context.Context, *ChooseBannerRequest) (*ChooseBannerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChooseBanner not implemented")
@@ -144,20 +144,20 @@ func _BannerRotationService_RemoveBanner_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BannerRotationService_IncrementCounter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IncrementCounterRequest)
+func _BannerRotationService_RegisterClick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterClickRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BannerRotationServiceServer).IncrementCounter(ctx, in)
+		return srv.(BannerRotationServiceServer).RegisterClick(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/BannerRotationService/IncrementCounter",
+		FullMethod: "/BannerRotationService/RegisterClick",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BannerRotationServiceServer).IncrementCounter(ctx, req.(*IncrementCounterRequest))
+		return srv.(BannerRotationServiceServer).RegisterClick(ctx, req.(*RegisterClickRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -193,8 +193,8 @@ var _BannerRotationService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _BannerRotationService_RemoveBanner_Handler,
 		},
 		{
-			MethodName: "IncrementCounter",
-			Handler:    _BannerRotationService_IncrementCounter_Handler,
+			MethodName: "RegisterClick",
+			Handler:    _BannerRotationService_RegisterClick_Handler,
 		},
 		{
 			MethodName: "ChooseBanner",

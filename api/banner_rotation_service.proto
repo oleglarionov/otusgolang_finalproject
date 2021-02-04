@@ -7,7 +7,7 @@ option go_package = ".;grpcgenerated";
 service BannerRotationService {
   rpc AddBanner(AddBannerRequest) returns (google.protobuf.Empty);
   rpc RemoveBanner(RemoveBannerRequest) returns (google.protobuf.Empty);
-  rpc IncrementCounter(IncrementCounterRequest) returns (google.protobuf.Empty);
+  rpc RegisterClick(RegisterClickRequest) returns (google.protobuf.Empty);
   rpc ChooseBanner(ChooseBannerRequest) returns (ChooseBannerResponse);
 }
 
@@ -21,7 +21,7 @@ message RemoveBannerRequest {
   string banner_id = 2;
 }
 
-message IncrementCounterRequest {
+message RegisterClickRequest {
   string slot_id = 1;
   string banner_id = 2;
   string user_group_id = 3;

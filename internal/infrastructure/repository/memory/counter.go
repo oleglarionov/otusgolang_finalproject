@@ -57,11 +57,11 @@ func (r *CounterRepository) IncrementClicks(ctx context.Context, slot banerrotat
 
 func (r *CounterRepository) getCounter(slot banerrotation.SlotID, userGroup banerrotation.UserGroupID, banner banerrotation.BannerID) banerrotation.Counter {
 	emptyCounter := banerrotation.Counter{
-		SlotID:      slot,
-		UserGroupID: userGroup,
-		BannerID:    banner,
-		Views:       0,
-		Clicks:      0,
+		Slot:      slot,
+		UserGroup: userGroup,
+		Banner:    banner,
+		Views:     0,
+		Clicks:    0,
 	}
 
 	slotData, ok := r.data[slot]
@@ -83,15 +83,15 @@ func (r *CounterRepository) getCounter(slot banerrotation.SlotID, userGroup bane
 }
 
 func (r *CounterRepository) saveCounter(counter banerrotation.Counter) {
-	slotData, ok := r.data[counter.SlotID]
+	slotData, ok := r.data[counter.Slot]
 	if !ok {
-		r.data[counter.SlotID] = make(map[banerrotation.UserGroupID]map[banerrotation.BannerID]banerrotation.Counter)
+		r.data[counter.Slot] = make(map[banerrotation.UserGroupID]map[banerrotation.BannerID]banerrotation.Counter)
 	}
 
-	_, ok = slotData[counter.UserGroupID]
+	_, ok = slotData[counter.UserGroup]
 	if !ok {
-		r.data[counter.SlotID][counter.UserGroupID] = make(map[banerrotation.BannerID]banerrotation.Counter)
+		r.data[counter.Slot][counter.UserGroup] = make(map[banerrotation.BannerID]banerrotation.Counter)
 	}
 
-	r.data[counter.SlotID][counter.UserGroupID][counter.BannerID] = counter
+	r.data[counter.Slot][counter.UserGroup][counter.Banner] = counter
 }

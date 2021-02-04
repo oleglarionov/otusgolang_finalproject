@@ -51,7 +51,7 @@ func (s *ChooserImpl) ChooseBanner(ctx context.Context, slot SlotID, userGroup U
 
 	j := algorithm.Ucb1(avgIncome, nj, n)
 
-	bannerID := counters[j].BannerID
+	bannerID := counters[j].Banner
 	err = s.counterRepository.IncrementViews(ctx, slot, userGroup, bannerID)
 	if err != nil {
 		return "", err

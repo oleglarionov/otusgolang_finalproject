@@ -76,7 +76,7 @@ func (u *BannerRotationImpl) ChooseBanner(ctx context.Context, slotID string, us
 	return string(banner), nil
 }
 
-func (u *BannerRotationImpl) RegisterClick(ctx context.Context, slotID string, userGroupID string, bannerID string) error {
+func (u *BannerRotationImpl) RegisterClick(ctx context.Context, slotID string, bannerID string, userGroupID string) error {
 	slot := banerrotation.SlotID(slotID)
 	userGroup := banerrotation.UserGroupID(userGroupID)
 	banner := banerrotation.BannerID(bannerID)

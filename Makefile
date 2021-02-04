@@ -13,7 +13,7 @@ test:
 	go test -race ./internal/...
 
 run:
-	docker-compose --file build/local/docker-compose.yaml up --build
+	docker-compose up --build
 
 build:
 	go build -v -o $(BIN) ./cmd

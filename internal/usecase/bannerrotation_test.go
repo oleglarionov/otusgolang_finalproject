@@ -58,7 +58,7 @@ func TestBannerRotationImpl(t *testing.T) {
 			viewsByBanner[banner] += 1
 
 			if banner == "banner-1" {
-				err = uc.RegisterClick(ctx, "slot-1", "group-1", banner)
+				err = uc.RegisterClick(ctx, "slot-1", banner, "group-1")
 				require.NoError(t, err)
 			}
 		}
