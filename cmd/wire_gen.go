@@ -17,20 +17,27 @@ import (
 
 // Injectors from wire.go:
 
-func setup(cfg Config) (*App, error) {
-	db, err := dbProvider(cfg)
+func setup(cfg Config) (*App, func(), error) {
+	db, cleanup, err := dbProvider(cfg)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	bannerRepository := sql.NewBannerRepository(db)
 	counterRepository := sql.NewCounterRepository(db)
 	chooserImpl := banerrotation.NewChooserImpl(bannerRepository, counterRepository)
-	amqpStreamer := streamer.NewAMQPStreamer()
+	amqpStreamer, cleanup2, err := streamerProvider(cfg)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	bannerRotationImpl := usecase.NewBannerRotationImpl(chooserImpl, bannerRepository, counterRepository, amqpStreamer)
 	bannerRotationServerImpl := internalgrpc.NewBannerRotationServerImpl(bannerRotationImpl)
 	server := grpcServerProvider(cfg, bannerRotationServerImpl)
 	app := NewApp(server)
-	return app, nil
+	return app, func() {
+		cleanup2()
+		cleanup()
+	}, nil
 }
 
 // wire.go:
@@ -39,6 +46,25 @@ func grpcServerProvider(cfg Config, service grpcgenerated.BannerRotationServiceS
 	return internalgrpc.NewServer(cfg.ServerPort, service)
 }
 
-func dbProvider(cfg Config) (*sqlx.DB, error) {
-	return sql.NewDB(cfg.DBDsn)
+func dbProvider(cfg Config) (*sqlx.DB, func(), error) {
+	db, err := sql.NewDB(cfg.DBDsn)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	cleanup := func() { db.Close() }
+
+	return db, cleanup, nil
+}
+
+func streamerProvider(cfg Config) (*streamer.AMQPStreamer, func(), error) {
+	s := streamer.NewAMQPStreamer(cfg.Rabbit)
+	err := s.Connect()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	cleanup := func() { s.Close() }
+
+	return s, cleanup, nil
 }

@@ -9,6 +9,7 @@ require (
 	github.com/lib/pq v1.9.0
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/viper v1.7.1
+	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.5.1
 	google.golang.org/grpc v1.35.0
 	google.golang.org/protobuf v1.25.0

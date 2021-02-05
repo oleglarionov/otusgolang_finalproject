@@ -14,7 +14,7 @@ import (
 	"github.com/oleglarionov/otusgolang_finalproject/internal/usecase"
 )
 
-func setup(cfg Config) (*App, error) {
+func setup(cfg Config) (*App, func(), error) {
 	wire.Build(
 		NewApp,
 		grpcServerProvider,
@@ -29,16 +29,35 @@ func setup(cfg Config) (*App, error) {
 		wire.Bind(new(banerrotation.BannerRepository), new(*sql.BannerRepository)),
 		sql.NewBannerRepository,
 		wire.Bind(new(event.Streamer), new(*streamer.AMQPStreamer)),
-		streamer.NewAMQPStreamer,
+		streamerProvider,
 		dbProvider,
 	)
-	return nil, nil
+	return nil, nil, nil
 }
 
 func grpcServerProvider(cfg Config, service grpcgenerated.BannerRotationServiceServer) *internalgrpc.Server {
 	return internalgrpc.NewServer(cfg.ServerPort, service)
 }
 
-func dbProvider(cfg Config) (*sqlx.DB, error) {
-	return sql.NewDB(cfg.DBDsn)
+func dbProvider(cfg Config) (*sqlx.DB, func(), error) {
+	db, err := sql.NewDB(cfg.DBDsn)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	cleanup := func() { db.Close() }
+
+	return db, cleanup, nil
+}
+
+func streamerProvider(cfg Config) (*streamer.AMQPStreamer, func(), error) {
+	s := streamer.NewAMQPStreamer(cfg.Rabbit)
+	err := s.Connect()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	cleanup := func() { s.Close() }
+
+	return s, cleanup, nil
 }
