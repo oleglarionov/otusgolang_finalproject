@@ -2,10 +2,12 @@ package streamer
 
 import (
 	"encoding/json"
+	"log"
+	"sync"
+
 	"github.com/oleglarionov/otusgolang_finalproject/internal/application/event"
 	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
-	"log"
 )
 
 type AMQPConfig struct {
@@ -14,10 +16,12 @@ type AMQPConfig struct {
 }
 
 type AMQPStreamer struct {
-	cfg  AMQPConfig
-	conn *amqp.Connection
-	ch   *amqp.Channel
-	q    amqp.Queue
+	cfg         AMQPConfig
+	isConnected bool
+	mux         sync.Mutex
+	conn        *amqp.Connection
+	ch          *amqp.Channel
+	q           amqp.Queue
 }
 
 func NewAMQPStreamer(cfg AMQPConfig) *AMQPStreamer {
@@ -25,6 +29,11 @@ func NewAMQPStreamer(cfg AMQPConfig) *AMQPStreamer {
 }
 
 func (s *AMQPStreamer) Push(event event.Event) error {
+	err := s.connect()
+	if err != nil {
+		return err
+	}
+
 	bytes, err := json.Marshal(event)
 	if err != nil {
 		return errors.WithStack(err)
@@ -46,7 +55,17 @@ func (s *AMQPStreamer) Push(event event.Event) error {
 	return nil
 }
 
-func (s *AMQPStreamer) Connect() error {
+func (s *AMQPStreamer) connect() error {
+	if s.isConnected {
+		return nil
+	}
+
+	s.mux.Lock()
+	defer s.mux.Unlock()
+	if s.isConnected {
+		return nil
+	}
+
 	conn, err := amqp.Dial(s.cfg.Dsn)
 	if err != nil {
 		return errors.WithStack(err)
@@ -72,6 +91,8 @@ func (s *AMQPStreamer) Connect() error {
 		return errors.WithStack(err)
 	}
 	s.q = q
+
+	s.isConnected = true
 
 	return nil
 }

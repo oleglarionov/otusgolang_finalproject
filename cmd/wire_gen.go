@@ -59,11 +59,6 @@ func dbProvider(cfg Config) (*sqlx.DB, func(), error) {
 
 func streamerProvider(cfg Config) (*streamer.AMQPStreamer, func(), error) {
 	s := streamer.NewAMQPStreamer(cfg.Rabbit)
-	err := s.Connect()
-	if err != nil {
-		return nil, nil, err
-	}
-
 	cleanup := func() { s.Close() }
 
 	return s, cleanup, nil

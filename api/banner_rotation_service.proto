@@ -34,4 +34,5 @@ message ChooseBannerRequest {
 
 message ChooseBannerResponse {
   string banner_id = 1;
+  bool banner_found = 2;
 }

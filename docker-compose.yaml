@@ -2,9 +2,13 @@ version: "3.8"
 
 services:
   db:
-    image: postgres
+    build:
+      context: ./build/db
+      dockerfile: Dockerfile
     ports:
       - 54330:5432
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - db-data:/var/lib/postgresql/data
   queue:
@@ -15,13 +19,26 @@ services:
   app:
     build:
       context: .
-      dockerfile: build/Dockerfile
+      dockerfile: build/app/Dockerfile
     environment:
       SERVER_PORT: 9091
     env_file:
-      - .env
+      - build/env/local/.env
     ports:
       - 9091:9091
+    depends_on:
+      - db
+      - queue
+  app-test:
+    build:
+      context: .
+      dockerfile: build/app/Dockerfile
+    environment:
+      SERVER_PORT: 9092
+    env_file:
+      - build/env/test/.env
+    ports:
+      - 9092:9092
     depends_on:
       - db
       - queue

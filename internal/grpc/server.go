@@ -5,6 +5,7 @@ import (
 
 	grpcgenerated "github.com/oleglarionov/otusgolang_finalproject/internal/grpc/generated"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type Server struct {
@@ -28,6 +29,8 @@ func (s *Server) Serve() error {
 	}
 
 	s.grpcServer = grpc.NewServer()
+	reflection.Register(s.grpcServer)
+
 	grpcgenerated.RegisterBannerRotationServiceServer(s.grpcServer, s.service)
 
 	if err := s.grpcServer.Serve(listener); err != nil {

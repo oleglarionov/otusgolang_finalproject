@@ -4,7 +4,10 @@ import (
 	"context"
 
 	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/algorithm"
+	"github.com/pkg/errors"
 )
+
+var ErrNoBanners = errors.New("no banners")
 
 type Chooser interface {
 	ChooseBanner(ctx context.Context, slotID SlotID, userGroupID UserGroupID) (BannerID, error)
@@ -26,6 +29,10 @@ func (s *ChooserImpl) ChooseBanner(ctx context.Context, slot SlotID, userGroup U
 	banners, err := s.bannerRepository.GetBanners(ctx, slot)
 	if err != nil {
 		return "", err
+	}
+
+	if len(banners) == 0 {
+		return "", ErrNoBanners
 	}
 
 	counters, err := s.counterRepository.GetCounters(ctx, slot, userGroup, banners)

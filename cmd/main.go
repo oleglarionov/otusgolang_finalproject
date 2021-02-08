@@ -3,13 +3,15 @@ package main
 import (
 	"context"
 	"errors"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
 	internalgrpc "github.com/oleglarionov/otusgolang_finalproject/internal/grpc"
 	"github.com/oleglarionov/otusgolang_finalproject/internal/infrastructure/streamer"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-	"log"
-	"os"
-	"os/signal"
 )
 
 type App struct {
@@ -18,6 +20,14 @@ type App struct {
 
 func NewApp(server *internalgrpc.Server) *App {
 	return &App{server: server}
+}
+
+func (a *App) Serve() error {
+	return a.server.Serve()
+}
+
+func (a *App) Stop() {
+	a.server.Stop()
 }
 
 func main() {
@@ -41,7 +51,7 @@ func main() {
 	go signalHandler(ctx, app, cancel)
 
 	go func() {
-		err := app.server.Serve()
+		err := app.Serve()
 		if err == nil || errors.Is(err, grpc.ErrServerStopped) {
 			log.Println("grpc server stopped")
 		} else {
@@ -56,12 +66,13 @@ func signalHandler(ctx context.Context, app *App, cancel context.CancelFunc) {
 	defer cancel()
 
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals)
+	signal.Notify(signals, syscall.SIGINT)
+	defer signal.Stop(signals)
 
 	select {
 	case <-signals:
-		signal.Stop(signals)
-		app.server.Stop()
+		log.Println("stop signal received")
+		app.Stop()
 	case <-ctx.Done():
 	}
 }

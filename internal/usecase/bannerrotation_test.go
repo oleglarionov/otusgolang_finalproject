@@ -19,8 +19,10 @@ func TestBannerRotationImpl(t *testing.T) {
 	}
 
 	t.Run("test views without clicks", func(t *testing.T) {
-		uc := buildBannerRotationImpl(t, banners)
-		ctx := context.Background()
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		uc := buildBannerRotationImpl(ctx, t, banners)
 
 		viewsByBanner := make(map[string]int)
 		n := 1000
@@ -47,8 +49,10 @@ func TestBannerRotationImpl(t *testing.T) {
 	})
 
 	t.Run("test with clicks on one banner", func(t *testing.T) {
-		uc := buildBannerRotationImpl(t, banners)
-		ctx := context.Background()
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		uc := buildBannerRotationImpl(ctx, t, banners)
 
 		viewsByBanner := make(map[string]int)
 		n := 1000
@@ -69,13 +73,12 @@ func TestBannerRotationImpl(t *testing.T) {
 	})
 }
 
-func buildBannerRotationImpl(t *testing.T, banners []initBanner) *BannerRotationImpl {
+func buildBannerRotationImpl(ctx context.Context, t *testing.T, banners []initBanner) *BannerRotationImpl {
 	bannerRepo := memory.NewBannerRepository()
 	counterRepo := memory.NewCounterRepository()
 	chooser := banerrotation.NewChooserImpl(bannerRepo, counterRepo)
 	streamer := &streamerStub{}
 
-	ctx := context.Background()
 	for _, b := range banners {
 		err := bannerRepo.AddBanner(ctx, b.slotID, b.bannerID)
 		require.NoError(t, err)

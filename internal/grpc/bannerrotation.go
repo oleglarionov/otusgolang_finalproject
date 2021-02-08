@@ -1,9 +1,11 @@
+//go:generate protoc banner_rotation_service.proto --go_out=./generated --go-grpc_out=./generated --proto_path=../../api/
+
 package internalgrpc
 
 import (
 	"context"
-	"github.com/golang/protobuf/ptypes/empty"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	grpcgenerated "github.com/oleglarionov/otusgolang_finalproject/internal/grpc/generated"
 	"github.com/oleglarionov/otusgolang_finalproject/internal/usecase"
 )
@@ -29,8 +31,14 @@ func (s *BannerRotationServerImpl) ChooseBanner(
 		return nil, err
 	}
 
+	bannerFound := true
+	if bannerID == "" {
+		bannerFound = false
+	}
+
 	return &grpcgenerated.ChooseBannerResponse{
-		BannerId: bannerID,
+		BannerId:    bannerID,
+		BannerFound: bannerFound,
 	}, nil
 }
 

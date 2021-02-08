@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 
@@ -59,6 +60,10 @@ func (u *BannerRotationImpl) ChooseBanner(ctx context.Context, slotID string, us
 
 	banner, err := u.chooser.ChooseBanner(ctx, slot, userGroup)
 	if err != nil {
+		if errors.Is(err, banerrotation.ErrNoBanners) {
+			return "", nil
+		}
+
 		return "", err
 	}
 

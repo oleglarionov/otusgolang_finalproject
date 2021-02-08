@@ -2,10 +2,10 @@ package sql
 
 import (
 	"context"
-	"github.com/pkg/errors"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/banerrotation"
+	"github.com/pkg/errors"
 )
 
 type CounterRepository struct {
@@ -38,8 +38,9 @@ func (r *CounterRepository) GetCounters(ctx context.Context, slot banerrotation.
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+	defer rows.Close()
 
-	var counters []banerrotation.Counter
+	counters := make([]banerrotation.Counter, 0, len(banners))
 	for rows.Next() {
 		var counter banerrotation.Counter
 		err := rows.StructScan(&counter)

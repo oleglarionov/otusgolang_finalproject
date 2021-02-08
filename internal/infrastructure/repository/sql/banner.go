@@ -2,10 +2,10 @@ package sql
 
 import (
 	"context"
-	"github.com/pkg/errors"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/banerrotation"
+	"github.com/pkg/errors"
 )
 
 type BannerRepository struct {
@@ -46,10 +46,14 @@ func (r *BannerRepository) GetBanners(ctx context.Context, slot banerrotation.Sl
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var banner banerrotation.BannerID
-		rows.Scan(&banner)
+		err := rows.Scan(&banner)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
 
 		banners = append(banners, banner)
 	}
