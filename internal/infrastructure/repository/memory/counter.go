@@ -7,17 +7,23 @@ import (
 	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/banerrotation"
 )
 
+type CounterKey struct {
+	SlotID      banerrotation.SlotID
+	UserGroupID banerrotation.UserGroupID
+	BannerID    banerrotation.BannerID
+}
+
 type CounterRepository struct {
 	mu   sync.RWMutex
-	data map[banerrotation.SlotID]map[banerrotation.UserGroupID]map[banerrotation.BannerID]banerrotation.Counter
+	data map[CounterKey]banerrotation.Counter
 }
 
 func NewCounterRepository() *CounterRepository {
-	data := make(map[banerrotation.SlotID]map[banerrotation.UserGroupID]map[banerrotation.BannerID]banerrotation.Counter)
+	data := make(map[CounterKey]banerrotation.Counter)
 	return &CounterRepository{data: data}
 }
 
-func (r *CounterRepository) GetCounters(ctx context.Context, slot banerrotation.SlotID, userGroup banerrotation.UserGroupID, banners []banerrotation.BannerID) ([]banerrotation.Counter, error) {
+func (r *CounterRepository) GetCounters(_ context.Context, slot banerrotation.SlotID, userGroup banerrotation.UserGroupID, banners []banerrotation.BannerID) ([]banerrotation.Counter, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -31,7 +37,7 @@ func (r *CounterRepository) GetCounters(ctx context.Context, slot banerrotation.
 	return counters, nil
 }
 
-func (r *CounterRepository) IncrementViews(ctx context.Context, slot banerrotation.SlotID, userGroup banerrotation.UserGroupID, banner banerrotation.BannerID) error {
+func (r *CounterRepository) IncrementViews(_ context.Context, slot banerrotation.SlotID, userGroup banerrotation.UserGroupID, banner banerrotation.BannerID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -43,7 +49,7 @@ func (r *CounterRepository) IncrementViews(ctx context.Context, slot banerrotati
 	return nil
 }
 
-func (r *CounterRepository) IncrementClicks(ctx context.Context, slot banerrotation.SlotID, userGroup banerrotation.UserGroupID, banner banerrotation.BannerID) error {
+func (r *CounterRepository) IncrementClicks(_ context.Context, slot banerrotation.SlotID, userGroup banerrotation.UserGroupID, banner banerrotation.BannerID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -56,42 +62,32 @@ func (r *CounterRepository) IncrementClicks(ctx context.Context, slot banerrotat
 }
 
 func (r *CounterRepository) getCounter(slot banerrotation.SlotID, userGroup banerrotation.UserGroupID, banner banerrotation.BannerID) banerrotation.Counter {
-	emptyCounter := banerrotation.Counter{
-		Slot:      slot,
-		UserGroup: userGroup,
-		Banner:    banner,
-		Views:     0,
-		Clicks:    0,
+	key := CounterKey{
+		SlotID:      slot,
+		UserGroupID: userGroup,
+		BannerID:    banner,
 	}
 
-	slotData, ok := r.data[slot]
+	counter, ok := r.data[key]
 	if !ok {
-		return emptyCounter
-	}
-
-	userGroupData, ok := slotData[userGroup]
-	if !ok {
-		return emptyCounter
-	}
-
-	counter, ok := userGroupData[banner]
-	if !ok {
-		return emptyCounter
+		return banerrotation.Counter{
+			Slot:      slot,
+			UserGroup: userGroup,
+			Banner:    banner,
+			Views:     0,
+			Clicks:    0,
+		}
 	}
 
 	return counter
 }
 
 func (r *CounterRepository) saveCounter(counter banerrotation.Counter) {
-	slotData, ok := r.data[counter.Slot]
-	if !ok {
-		r.data[counter.Slot] = make(map[banerrotation.UserGroupID]map[banerrotation.BannerID]banerrotation.Counter)
+	key := CounterKey{
+		SlotID:      counter.Slot,
+		UserGroupID: counter.UserGroup,
+		BannerID:    counter.Banner,
 	}
 
-	_, ok = slotData[counter.UserGroup]
-	if !ok {
-		r.data[counter.Slot][counter.UserGroup] = make(map[banerrotation.BannerID]banerrotation.Counter)
-	}
-
-	r.data[counter.Slot][counter.UserGroup][counter.Banner] = counter
+	r.data[key] = counter
 }

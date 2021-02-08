@@ -1,4 +1,4 @@
-package test
+package integration
 
 import (
 	"context"
@@ -192,7 +192,7 @@ func (s *BannerRotationSuite) cleanupDb() {
 		s.FailNow(err.Error())
 	}
 
-	err = goose.Up(s.db.DB, "../migrations")
+	err = goose.Up(s.db.DB, "../../migrations")
 	if err != nil {
 		s.FailNow(err.Error())
 	}

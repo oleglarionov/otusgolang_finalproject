@@ -6,7 +6,6 @@
 package main
 
 import (
-	"github.com/jmoiron/sqlx"
 	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/banerrotation"
 	"github.com/oleglarionov/otusgolang_finalproject/internal/grpc"
 	"github.com/oleglarionov/otusgolang_finalproject/internal/grpc/generated"
@@ -18,12 +17,12 @@ import (
 // Injectors from wire.go:
 
 func setup(cfg Config) (*App, func(), error) {
-	db, cleanup, err := dbProvider(cfg)
+	dbConnectorImpl, cleanup, err := dbConnectorProvider(cfg)
 	if err != nil {
 		return nil, nil, err
 	}
-	bannerRepository := sql.NewBannerRepository(db)
-	counterRepository := sql.NewCounterRepository(db)
+	bannerRepository := sql.NewBannerRepository(dbConnectorImpl)
+	counterRepository := sql.NewCounterRepository(dbConnectorImpl)
 	chooserImpl := banerrotation.NewChooserImpl(bannerRepository, counterRepository)
 	amqpStreamer, cleanup2, err := streamerProvider(cfg)
 	if err != nil {
@@ -46,15 +45,11 @@ func grpcServerProvider(cfg Config, service grpcgenerated.BannerRotationServiceS
 	return internalgrpc.NewServer(cfg.ServerPort, service)
 }
 
-func dbProvider(cfg Config) (*sqlx.DB, func(), error) {
-	db, err := sql.NewDB(cfg.DBDsn)
-	if err != nil {
-		return nil, nil, err
-	}
+func dbConnectorProvider(cfg Config) (*sql.DBConnectorImpl, func(), error) {
+	dbConnector := sql.NewDBConnectorImpl(cfg.DBDsn)
+	cleanup := func() { dbConnector.CloseConn() }
 
-	cleanup := func() { db.Close() }
-
-	return db, cleanup, nil
+	return dbConnector, cleanup, nil
 }
 
 func streamerProvider(cfg Config) (*streamer.AMQPStreamer, func(), error) {

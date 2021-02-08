@@ -41,9 +41,7 @@ func (s *ChooserImpl) ChooseBanner(ctx context.Context, slot SlotID, userGroup U
 	}
 
 	l := len(counters)
-	avgIncome := make([]float64, 0, l)
-	nj := make([]uint64, 0, l)
-	n := uint64(0)
+	stats := make([]algorithm.Ucb1ElStat, 0, l)
 
 	for _, counter := range counters {
 		curIncome := 0.0
@@ -51,12 +49,14 @@ func (s *ChooserImpl) ChooseBanner(ctx context.Context, slot SlotID, userGroup U
 			curIncome = float64(counter.Clicks) / float64(counter.Views)
 		}
 
-		avgIncome = append(avgIncome, curIncome)
-		nj = append(nj, counter.Views)
-		n += counter.Views
+		curStat := algorithm.Ucb1ElStat{
+			AvgIncome: curIncome,
+			Attempts:  counter.Views,
+		}
+		stats = append(stats, curStat)
 	}
 
-	j := algorithm.Ucb1(avgIncome, nj, n)
+	j := algorithm.Ucb1(stats)
 
 	bannerID := counters[j].Banner
 	err = s.counterRepository.IncrementViews(ctx, slot, userGroup, bannerID)

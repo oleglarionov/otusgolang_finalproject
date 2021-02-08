@@ -99,10 +99,16 @@ func (s *AMQPStreamer) connect() error {
 
 func (s *AMQPStreamer) Close() {
 	if s.ch != nil {
-		s.ch.Close()
+		err := s.ch.Close()
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	if s.conn != nil {
-		s.conn.Close()
+		err := s.conn.Close()
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }

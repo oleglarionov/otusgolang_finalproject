@@ -9,14 +9,19 @@ import (
 )
 
 type CounterRepository struct {
-	db *sqlx.DB
+	dbConnector DBConnector
 }
 
-func NewCounterRepository(db *sqlx.DB) *CounterRepository {
-	return &CounterRepository{db: db}
+func NewCounterRepository(dbConnector DBConnector) *CounterRepository {
+	return &CounterRepository{dbConnector: dbConnector}
 }
 
 func (r *CounterRepository) GetCounters(ctx context.Context, slot banerrotation.SlotID, userGroup banerrotation.UserGroupID, banners []banerrotation.BannerID) ([]banerrotation.Counter, error) {
+	db, err := r.dbConnector.GetConn()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	bannersMap := make(map[banerrotation.BannerID]bool, len(banners))
 	for _, banner := range banners {
 		bannersMap[banner] = true
@@ -33,8 +38,8 @@ func (r *CounterRepository) GetCounters(ctx context.Context, slot banerrotation.
 		return nil, errors.WithStack(err)
 	}
 
-	sql = r.db.Rebind(sql)
-	rows, err := r.db.QueryxContext(ctx, sql, args...)
+	sql = db.Rebind(sql)
+	rows, err := db.QueryxContext(ctx, sql, args...)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -42,8 +47,13 @@ func (r *CounterRepository) GetCounters(ctx context.Context, slot banerrotation.
 
 	counters := make([]banerrotation.Counter, 0, len(banners))
 	for rows.Next() {
+		err := rows.Err()
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
 		var counter banerrotation.Counter
-		err := rows.StructScan(&counter)
+		err = rows.StructScan(&counter)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
@@ -72,7 +82,12 @@ func (r *CounterRepository) IncrementViews(
 	userGroup banerrotation.UserGroupID,
 	banner banerrotation.BannerID,
 ) error {
-	_, err := r.db.ExecContext(ctx,
+	db, err := r.dbConnector.GetConn()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	_, err = db.ExecContext(ctx,
 		"insert into counters"+
 			"(slot_id, banner_id, user_group_id, views, clicks) "+
 			"values ($1, $2, $3, 1, 0) "+
@@ -89,7 +104,12 @@ func (r *CounterRepository) IncrementViews(
 }
 
 func (r *CounterRepository) IncrementClicks(ctx context.Context, slot banerrotation.SlotID, userGroup banerrotation.UserGroupID, banner banerrotation.BannerID) error {
-	result, err := r.db.ExecContext(ctx,
+	db, err := r.dbConnector.GetConn()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	result, err := db.ExecContext(ctx,
 		"update counters set clicks=clicks+1 where slot_id=$1 and banner_id=$2 and user_group_id=$3",
 		slot, banner, userGroup,
 	)

@@ -4,7 +4,6 @@ package main
 
 import (
 	"github.com/google/wire"
-	"github.com/jmoiron/sqlx"
 	"github.com/oleglarionov/otusgolang_finalproject/internal/application/event"
 	"github.com/oleglarionov/otusgolang_finalproject/internal/domain/banerrotation"
 	internalgrpc "github.com/oleglarionov/otusgolang_finalproject/internal/grpc"
@@ -29,8 +28,9 @@ func setup(cfg Config) (*App, func(), error) {
 		wire.Bind(new(banerrotation.BannerRepository), new(*sql.BannerRepository)),
 		sql.NewBannerRepository,
 		wire.Bind(new(event.Streamer), new(*streamer.AMQPStreamer)),
+		wire.Bind(new(sql.DBConnector), new(*sql.DBConnectorImpl)),
 		streamerProvider,
-		dbProvider,
+		dbConnectorProvider,
 	)
 	return nil, nil, nil
 }
@@ -39,15 +39,11 @@ func grpcServerProvider(cfg Config, service grpcgenerated.BannerRotationServiceS
 	return internalgrpc.NewServer(cfg.ServerPort, service)
 }
 
-func dbProvider(cfg Config) (*sqlx.DB, func(), error) {
-	db, err := sql.NewDB(cfg.DBDsn)
-	if err != nil {
-		return nil, nil, err
-	}
+func dbConnectorProvider(cfg Config) (*sql.DBConnectorImpl, func(), error) {
+	dbConnector := sql.NewDBConnectorImpl(cfg.DBDsn)
+	cleanup := func() { dbConnector.CloseConn() }
 
-	cleanup := func() { db.Close() }
-
-	return db, cleanup, nil
+	return dbConnector, cleanup, nil
 }
 
 func streamerProvider(cfg Config) (*streamer.AMQPStreamer, func(), error) {
